@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+external/hamer/.hamer/
+
+# Large model/data files
+*.ckpt
+*.pth
+*.pt
+*.pkl
+*.npz
+*.npy
+*.ply
+*.obj
+
+# Project outputs
+outputs/
+checkpoints/
+
+# Input data
+inputs/
+!inputs/.gitkeep
+
+# HaMeR downloaded assets
+external/hamer/_DATA/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
