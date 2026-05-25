@@ -216,21 +216,43 @@ def main():
         vertices = np.load(str(vertices_path))
         faces = np.load(str(faces_path))
 
-        cam_t = entry.get("pred_cam_t_full") or entry.get("full_img_cam_t")
+        # Access nested hamer_output structure
+        ham_out = entry.get("hamer_output", {})
+        preprocessing = ham_out.get("preprocessing", {})
+        original_width = preprocessing.get("original_image_width", width)
+        original_height = preprocessing.get("original_image_height", height)
+        img_size = preprocessing.get("img_size")
+        scaled_focal_length = ham_out.get("scaled_focal_length") or entry.get("scaled_focal_length")
+
+        pred_cam_t_full = ham_out.get("pred_cam_t_full") or entry.get("pred_cam_t_full") or ham_out.get("full_img_cam_t") or entry.get("full_img_cam_t")
+        pred_cam_t = ham_out.get("pred_cam_t")
+        cam_t = pred_cam_t_full if pred_cam_t_full is not None else pred_cam_t
         if cam_t is None:
             raise ValueError(f"Missing pred_cam_t_full or full_img_cam_t for hand index {hand_index}")
-        focal = entry.get("scaled_focal_length") or entry.get("focal_length") or entry.get("focal")
+        focal = scaled_focal_length or ham_out.get("focal_length") or ham_out.get("focal")
         if focal is None:
             raise ValueError(f"Missing focal length for hand index {hand_index}")
-        center = entry.get("center")
-        img_size = entry.get("img_size")
+        center = ham_out.get("center")
+        camera_translation_source = "pred_cam_t_full" if pred_cam_t_full is not None else ("pred_cam_t" if pred_cam_t is not None else None)
+
+        # Determine center based on source
+        if camera_translation_source == "pred_cam_t_full":
+            if img_size is not None and len(img_size) >= 2:
+                center = [float(img_size[0]) / 2.0, float(img_size[1]) / 2.0]
+            else:
+                center = [float(original_width) / 2.0, float(original_height) / 2.0]
+        else:
+            if center is None and img_size is not None and len(img_size) >= 2:
+                center = [float(img_size[0]) / 2.0, float(img_size[1]) / 2.0]
+            if center is None:
+                center = [float(original_width) / 2.0, float(original_height) / 2.0]
 
         original_projection, depth_values = project_vertices(
             vertices,
             cam_t,
             focal,
             center,
-            img_size,
+            img_size or [original_width, original_height],
             (width, height),
         )
 
@@ -250,7 +272,7 @@ def main():
             "hand_index": hand_index,
             "hand_side_for_hamer": hand_label,
             "raw_handedness": raw_handedness,
-            "camera_translation_source": "pred_cam_t_full" if entry.get("pred_cam_t_full") is not None else "full_img_cam_t",
+            "camera_translation_source": camera_translation_source,
             "left_bbox_2d_mirror_applied": left_mirror_applied,
             "projected_bbox": projected_bbox,
             "left_bbox_2d_mirror_bbox": left_mirror_bbox,

@@ -2,6 +2,24 @@
 
 **Project goal:** reproduce an EgoWorld Stage 1-style observation extraction pipeline from an exocentric RGB image to hand crops and HaMeR mesh metadata.
 
+## Workspace documentation
+
+- `docs/PROJECT_STATUS.md` — current achievement summary and final outputs
+- `docs/PIPELINE_OVERVIEW.md` — step-by-step pipeline explanation
+- `docs/FILE_MANIFEST.md` — important files, shapes, and status
+- `docs/RUNBOOK.md` — exact PowerShell commands for rerunning the pipeline
+- `docs/KNOWN_ISSUES.md` — current issues, failure modes, and constraints
+- `docs/CLEANUP_LOG.md` — files moved to `_trash_review` and why
+
+## 한국어 문서
+
+- `docs/PROJECT_MAP_KR.md`
+- `docs/FILE_DEPENDENCY_GRAPH_KR.md`
+- `docs/RUN_COMMANDS_KR.md`
+- `docs/OBSOLETE_OR_FAILED_KR.md`
+
+프로젝트의 코드 파일, 산출물 파일, 실행 순서, 현재 구현 범위는 위 한국어 문서에 정리되어 있습니다.
+
 This repo implements Stage 1 building blocks:
 - monocular depth estimation (dummy or MoGe)
 - RGB-D backprojection to a point cloud

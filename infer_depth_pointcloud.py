@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 from src.depth_estimator import DepthEstimator
@@ -29,6 +30,8 @@ def main() -> None:
     depth_raw_path = os.path.join(args.out, "depth_raw.npy")
     depth_vis_path = os.path.join(args.out, "depth_vis.png")
     ply_path = os.path.join(args.out, "exo_point_cloud.ply")
+    k_npy_path = os.path.join(args.out, "K_exo.npy")
+    k_json_path = os.path.join(args.out, "depth_intrinsics.json")
 
     save_depth_npy(depth, depth_raw_path)
     print(f"\nGenerating depth visualization...")
@@ -39,9 +42,22 @@ def main() -> None:
     points_xyz, colors_rgb = backproject_rgbd_to_pointcloud(rgb, depth, K)
     save_pointcloud_ply(points_xyz, colors_rgb, ply_path)
 
+    # Save intrinsics
+    import numpy as np
+    np.save(k_npy_path, K)
+    k_dict = {
+        "fx": float(K[0, 0]),
+        "fy": float(K[1, 1]),
+        "cx": float(K[0, 2]),
+        "cy": float(K[1, 2]),
+    }
+    with open(k_json_path, "w", encoding="utf-8") as f:
+        json.dump(k_dict, f, indent=2)
+
     print(f"Saved raw depth: {depth_raw_path}")
     print(f"Saved depth visualization: {depth_vis_path}")
     print(f"Saved point cloud: {ply_path}")
+    print(f"Saved camera intrinsics: {k_npy_path}, {k_json_path}")
 
 
 if __name__ == "__main__":
